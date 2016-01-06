@@ -1,5 +1,7 @@
 PROJECT(SRS-FIGURE)
-SET(SRC_LIST srs-figure.cpp SRSClient.cpp)
+SET(PROTOCOL_RTMP_HANDSHAKE ./protocol/srs_figure_rtmp_handshake.cpp)
+SET(APP_SOCKET ./app/srs_figure_app_socket.cpp)
+SET(SRC_LIST srs-figure.cpp SRSClient.cpp ${PROTOCOL_RTMP_HANDSHAKE} ${APP_SOCKET})
 SET(CMAKE_BUILD_TYPE Debug)
 MESSAGE(STATUS "This is BINARY dir" ${SRS_BINARY_DIR})
 MESSAGE(STATUS "This is SOURCE dir" ${SRS_SOURCE_DIR})
