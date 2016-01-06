@@ -37,7 +37,8 @@ namespace _srs_figure_handshake
 		// 4 bytes
 		int32_t zero;
 		// 1528 bytes
-		unsigned char random_echo[1528];
+		unsigned char random_echo[1528];// 1528 is from the RTMP standerd document
+
 	public:
 		c2s2();
 		virtual ~c2s2();
