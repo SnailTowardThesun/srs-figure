@@ -2,6 +2,8 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
+#include <stdarg.h>
 
 srs_figure_log* srs_figure_log::pInstance = nullptr;
 pthread_mutex_t srs_figure_log::mutex = PTHREAD_MUTEX_INITIALIZER;
