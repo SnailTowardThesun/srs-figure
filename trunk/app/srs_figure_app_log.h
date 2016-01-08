@@ -4,7 +4,6 @@
 #define __HEADER_APP_LOG__
 
 #include "../core/srs_figure_core.h"
-#include <iostream>
 using namespace std;
 
 #define DEFAULT_SRS_FIGURE_LOG_FILE "srs-figure.log"
