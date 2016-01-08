@@ -4,6 +4,7 @@
 #include <fcntl.h>
 
 srs_figure_log* srs_figure_log::pInstance = nullptr;
+pthread_mutex_t srs_figure_log::mutex = PTHREAD_MUTEX_INITIALIZER;
 
 srs_figure_log::srs_figure_log() : mLogFile(DEFAULT_SRS_FIGURE_LOG_FILE),
 		log_data(nullptr),
@@ -15,6 +16,7 @@ srs_figure_log::srs_figure_log() : mLogFile(DEFAULT_SRS_FIGURE_LOG_FILE),
 srs_figure_log::~srs_figure_log()
 {
 	if(log_data != nullptr) delete log_data;
+	if(flogFile > 0) ::close(flogFile);
 }
 
 srs_figure_log* srs_figure_log::getInstance()
@@ -78,9 +80,11 @@ bool srs_figure_log::generate_header(const char* tag, int context_id, const char
 
 long srs_figure_log::log(const char* level_name, const char* tag ,const char *fmt, ...)
 {
+	pthread_mutex_lock(&mutex);
 	int header_size = 0,size = 0;
 	if(!generate_header(tag,0,level_name,&header_size))
 	{
+		pthread_mutex_unlock(&mutex);
 		return RESULT_ERROR;
 	}
 
@@ -100,6 +104,10 @@ long srs_figure_log::log(const char* level_name, const char* tag ,const char *fm
             S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH
         );
     }
-
+	if(flogFile > 0)
+	{
+		::write(flogFile,log_data,size);
+	}
+	pthread_mutex_unlock(&mutex);
 	return RESULT_OK;
 }

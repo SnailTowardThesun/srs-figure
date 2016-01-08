@@ -5,6 +5,7 @@
 
 #include "../core/srs_figure_core.h"
 #include <iostream>
+#include <pthread.h>
 using namespace std;
 
 #define DEFAULT_SRS_FIGURE_LOG_FILE "srs-figure.log"
@@ -19,6 +20,7 @@ public:
 public:
 	static srs_figure_log *pInstance;
 	static srs_figure_log *getInstance();
+	static pthread_mutex_t mutex;
 private:
 	std::string mLogFile;
 	char* log_data;
