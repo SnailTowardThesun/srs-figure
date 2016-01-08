@@ -4,4 +4,6 @@
 #define RESULT_OK		0
 #define RESULT_ERROR	1
 #include <string.h>
+#include <iostream>
+#include <pthread.h>
 #endif

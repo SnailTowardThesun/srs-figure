@@ -5,7 +5,6 @@
 
 #include "../core/srs_figure_core.h"
 #include <iostream>
-#include <pthread.h>
 using namespace std;
 
 #define DEFAULT_SRS_FIGURE_LOG_FILE "srs-figure.log"

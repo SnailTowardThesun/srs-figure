@@ -1,4 +1,5 @@
 #include "srs_figure_app_socket.h"
+#include "srs_figure_app_log.h"
 using namespace srs_figure_socket;
 // base part 
 base_socket::base_socket():mSocket(-1)
@@ -22,8 +23,10 @@ tcp_socket::~tcp_socket()
 
 long tcp_socket::createSocket(const char* pTargetIP, const int sTargetPort)
 {
-	if(mSocket = socket(AF_INET,SOCK_STREAM,0) == -1)
+	mSocket = socket(AF_INET,SOCK_STREAM,0);
+	if(mSocket == -1)
 	{
+		srs_figure_log::getInstance()->log("Error",nullptr,"fail to create a TCP socket");
 		return RESULT_ERROR;
 	}
 	
@@ -34,6 +37,7 @@ long tcp_socket::createSocket(const char* pTargetIP, const int sTargetPort)
 	// connect to server
 	if(connect(mSocket,(const sockaddr*)&mSocketAddr,sizeof(mSocketAddr)) != 0)
 	{
+		srs_figure_log::getInstance()->log("Error",nullptr,"fail to connect to the server : %s ",pTargetIP);
 		return RESULT_ERROR;
 	}
 	return RESULT_OK;
@@ -52,7 +56,8 @@ udp_socket::~udp_socket()
 
 long udp_socket::createSocket(const char* pTargetIP, const int sTargetPort)
 {
-	if(mSocket = socket(AF_INET,SOCK_DGRAM,0) == -1)
+	mSocket = socket(AF_INET,SOCK_DGRAM,0);
+	if(mSocket == -1)
 	{
 		return RESULT_ERROR;
 	}
