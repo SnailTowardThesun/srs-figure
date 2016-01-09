@@ -4,6 +4,8 @@
 
 #include "../core/srs_figure_core.h"
 using namespace std;
+#include "../rapidjson/rapidjson.h" // for parser json configure
+using namespace rapidjson;
 #define DEFAULT_CONFIGURE_FILE "../conf/srs-figure.json"
 class srs_figure_conf
 {
