@@ -6,4 +6,5 @@
 #include <string.h>
 #include <iostream>
 #include <pthread.h>
+#include <stdio.h>
 #endif

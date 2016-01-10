@@ -3,7 +3,7 @@
 using namespace std;
 int main()
 {
+	cout<<"srs-figure begins to run"<<endl;
 	SRSClient client;
-	cout<<"hello srs-figure"<<endl;
 	return 0;
 }
