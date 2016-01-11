@@ -18,7 +18,8 @@ SET(APP_FUNCTION ${APP_LOG} ${APP_CONF} ${APP_SOCKET})
 
 SET(CORE_CORE ./core/srs_figure_core.cpp)
 
-SET(SRC_LIST ${CORE_CORE} ${APP_FUNCTION} ${PROTOCOL_FUNCTION} SRSClient.cpp srs-figure.cpp )
+SET(KERNEL_STREAM ./kernel/srs_figure_kernel_stream.cpp)
+SET(SRC_LIST ${CORE_CORE} ${APP_FUNCTION} ${PROTOCOL_FUNCTION} ${KERNEL_STREAM} SRSClient.cpp srs-figure.cpp )
 
 SET(SRS_BINARY_DIR "./objs/")
 
