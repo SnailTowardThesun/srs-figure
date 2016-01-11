@@ -21,6 +21,7 @@ tcp_socket::~tcp_socket()
 
 }
 
+
 long tcp_socket::createSocket(const char* pTargetIP, const int sTargetPort)
 {
 	mSocket = socket(AF_INET,SOCK_STREAM,0);
@@ -40,9 +41,20 @@ long tcp_socket::createSocket(const char* pTargetIP, const int sTargetPort)
 		srs_figure_log::getInstance()->log("Error",nullptr,"fail to connect to the server : %s ",pTargetIP);
 		return RESULT_ERROR;
 	}
+
+	// create the thread to receive msg
+	mRecvThread = std::thread(InitRecvThread,this);
 	return RESULT_OK;
 }
 
+void tcp_socket::recvThread()
+{
+	cout<<"step into thread"<<endl;
+	do
+	{
+
+	}while(1)
+}
 
 
 //udp part

@@ -7,4 +7,5 @@
 #include <iostream>
 #include <pthread.h>
 #include <stdio.h>
+#include <thread>
 #endif
