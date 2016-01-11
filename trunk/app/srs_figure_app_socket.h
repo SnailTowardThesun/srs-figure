@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <csignal>
 using namespace std;
 
 namespace srs_figure_socket
@@ -17,11 +18,12 @@ namespace srs_figure_socket
 		virtual ~base_socket();
 	public:
 		virtual long createSocket(const char* pTargetIP,const int lTargetPort) = 0;
-		virtual void recvThread() = 0;
+		virtual long sendMsg(const char* pMsg,size_t msgLength) = 0;
+		virtual long recvMsg(const char* pMsg,size_t& msgLength) = 0;
 	public:
 		int mSocket;
-		std::thread mRecvThread;
 		struct sockaddr_in mSocketAddr;
+		char* mpMsg;
 	};
 	class tcp_socket: base_socket
 	{
@@ -30,9 +32,9 @@ namespace srs_figure_socket
 		virtual ~tcp_socket();
 	public:
 		long createSocket(const char* pTargetIP,const int lTargetPort);
-		void recvThread();
-	protected:
-		static void InitRecvThread(void* pThis){ return ((tcp_socket*)pThis)->recvThread(); }
+		long sendMsg(const char* pMsg, size_t msgLenght);	
+		virtual long recvMsg(const char* pMsg,size_t& msgLength);
+
 	};
 
 	class udp_socket: base_socket

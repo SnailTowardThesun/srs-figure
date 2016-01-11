@@ -1,14 +1,20 @@
 #include "srs_figure_app_socket.h"
 #include "srs_figure_app_log.h"
 using namespace srs_figure_socket;
+
+#define MESSAGE_MAX_LENGTH 60*1024
+
 // base part 
-base_socket::base_socket():mSocket(-1)
+base_socket::base_socket():mSocket(-1),
+		mpMsg(nullptr)
 {
 	memset(&mSocketAddr,0,sizeof(mSocketAddr));
+	mpMsg = new char[MESSAGE_MAX_LENGTH];
 }
 
 base_socket::~base_socket()
 {
+	if(mpMsg != nullptr) delete mpMsg;
 }
 // tcp part
 tcp_socket::tcp_socket()
@@ -18,7 +24,7 @@ tcp_socket::tcp_socket()
 
 tcp_socket::~tcp_socket()
 {
-
+	if(mSocket != -1) close(mSocket);
 }
 
 
@@ -42,18 +48,29 @@ long tcp_socket::createSocket(const char* pTargetIP, const int sTargetPort)
 		return RESULT_ERROR;
 	}
 
-	// create the thread to receive msg
-	mRecvThread = std::thread(InitRecvThread,this);
 	return RESULT_OK;
 }
 
-void tcp_socket::recvThread()
+long tcp_socket::sendMsg(const char* pMsg,size_t msgLength)
 {
-	cout<<"step into thread"<<endl;
-	do
+	if(mSocket == -1) return RESULT_ERROR;
+	if(int ret = send(mSocket,pMsg,msgLength,0) > 0)
 	{
+		return RESULT_OK;
+	}
+	return RESULT_ERROR;
+}
 
-	}while(1)
+long tcp_socket::recvMsg(const char* pMsg, size_t& msgLength)
+{
+	if(mSocket == -1) return RESULT_ERROR;
+	memset(mpMsg,0,MESSAGE_MAX_LENGTH);
+	if(msgLength = recv(mSocket,mpMsg,MESSAGE_MAX_LENGTH,0) > 0)
+	{
+		pMsg =  mpMsg;
+		return RESULT_OK;
+	}
+	return RESULT_ERROR;
 }
 
 
