@@ -54,7 +54,8 @@ long tcp_socket::createSocket(const char* pTargetIP, const int sTargetPort)
 long tcp_socket::sendMsg(const char* pMsg,size_t msgLength)
 {
 	if(mSocket == -1) return RESULT_ERROR;
-	if(int ret = send(mSocket,pMsg,msgLength,0) > 0)
+	int ret = send(mSocket,pMsg,msgLength,0);
+	if(ret > 0)
 	{
 		return RESULT_OK;
 	}
@@ -65,7 +66,8 @@ long tcp_socket::recvMsg(const char* pMsg, size_t& msgLength)
 {
 	if(mSocket == -1) return RESULT_ERROR;
 	memset(mpMsg,0,MESSAGE_MAX_LENGTH);
-	if(msgLength = recv(mSocket,mpMsg,MESSAGE_MAX_LENGTH,0) > 0)
+	msgLength = recv(mSocket,mpMsg,MESSAGE_MAX_LENGTH,0);
+	if(msgLength > 0)
 	{
 		pMsg =  mpMsg;
 		return RESULT_OK;
