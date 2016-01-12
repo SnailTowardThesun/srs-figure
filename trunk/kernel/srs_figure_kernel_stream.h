@@ -17,7 +17,7 @@ public:
 private:
 	tcp_socket mSocket;
 	pthread_t mpTRecvThread;
-	pthread_attr_t mRecvAttr;
+	bool mIsExited;
 protected:
 	static void* InitRecvThread(void* pParam){ return ((srs_stream*)pParam)->RecvThread(); }
 	void* RecvThread();

@@ -1,14 +1,16 @@
 #include "srs_figure_kernel_stream.h"
 #include "../app/srs_figure_app_log.h"
 
-srs_stream::srs_stream():mpTRecvThread(nullptr)
+srs_stream::srs_stream():
+	mpTRecvThread(0),
+	mIsExited(false)
 {
 
 }
 
 srs_stream::~srs_stream()
 {
-	if(mpTRecvThread != nullptr)
+	if(mpTRecvThread != 0)
 		CloseSRSConnection();
 
 }
@@ -54,10 +56,15 @@ long srs_stream::CreateSRSConnection()
 	mSocket.sendMsg((const char*)&c2,sizeof(c2s2));
 
 	// finish the handshake,then create the receive thread
-	if(mpTRecvThread == nullptr)
+	if(mpTRecvThread == 0)
 	{
-		int ret = pthread_create(&mpTRecvThread,NULL,InitRecvThread,(void*)this);
-		if(ret != 0) srs_figure_log::getInstance()->log("Error","srs_stream","error to create receive thread,and the error num is %d",ret);		
+		pthread_attr_t attr;
+		pthread_attr_init(&attr);
+		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+		int ret = pthread_create(&mpTRecvThread,&attr,InitRecvThread,(void*)this);
+		pthread_attr_destroy(&attr);
+		if(ret != 0) srs_figure_log::getInstance()->log("Error","srs_stream","error to create receive thread,and the error num is %d",ret);
+		mIsExited = false;
 	}
 
 	return RESULT_OK;
@@ -65,10 +72,12 @@ long srs_stream::CreateSRSConnection()
 
 long srs_stream::CloseSRSConnection()
 {
-	if(mpTRecvThread == nullptr) return RESULT_OK;
+	if(mpTRecvThread == 0) return RESULT_OK;
 	// send signal to stop the receive thread
-	
-	mpTRecvThread = nullptr;
+	mIsExited = true;
+	void* state = nullptr;
+	pthread_join(&mpTRecvThread,&state);
+	mpTRecvThread = 0;
 	return RESULT_OK;
 }
 
@@ -83,7 +92,7 @@ void* srs_stream::RecvThread()
 		{
 			DecodeOneChunk(static_cast<const char*>(pMsg),static_cast<const int>(receivedMsgLength));
 		}
-	}while(1);
+	}while(!mIsExited);
 	pthread_exit(0);
 	return nullptr;
 }
