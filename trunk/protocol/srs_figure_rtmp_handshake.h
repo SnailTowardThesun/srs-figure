@@ -26,7 +26,7 @@ namespace srs_figure_handshake
 		unsigned char random_data[1528];// 1528 is from the RTMP standerd document
 	public:
 		c1s1();
-		~c1s1();
+		virtual ~c1s1();
 	public:
 		const char* getMsg();
 	};
@@ -42,8 +42,8 @@ namespace srs_figure_handshake
 		unsigned char random_echo[1528];// 1528 is from the RTMP standerd document
 
 	public:
-		c2s2();
-		~c2s2();
+		c2s2(){};
+		virtual ~c2s2(){};
 	public:
 		const char* getMsg();
 	};

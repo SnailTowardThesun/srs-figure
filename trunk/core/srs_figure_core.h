@@ -8,4 +8,6 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <thread>
+
+#define DEFAULT_CHUNK_SIZE 60*1000
 #endif

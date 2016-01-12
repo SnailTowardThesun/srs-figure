@@ -16,8 +16,15 @@ public:
 	~srs_stream();
 private:
 	tcp_socket mSocket;
+	pthread_t mpTRecvThread;
+	pthread_attr_t mRecvAttr;
+protected:
+	static void* InitRecvThread(void* pParam){ return ((srs_stream*)pParam)->RecvThread(); }
+	void* RecvThread();
+	void DecodeOneChunk(const char* pMsg,const int lMsg);
 public:
 	long CreateSRSConnection();
+	long CloseSRSConnection();
 };
 
 #endif
