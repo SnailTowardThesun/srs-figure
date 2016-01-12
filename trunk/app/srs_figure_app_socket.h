@@ -21,6 +21,7 @@ namespace srs_figure_socket
 		virtual long createSocket(const char* pTargetIP,const int lTargetPort) = 0;
 		virtual long sendMsg(const char* pMsg,size_t msgLength) = 0;
 		virtual long recvMsg(const char* pMsg,size_t& msgLength) = 0;
+		virtual long closeConnection() = 0;
 	public:
 		int mSocket;
 		struct sockaddr_in mSocketAddr;
@@ -34,7 +35,8 @@ namespace srs_figure_socket
 	public:
 		long createSocket(const char* pTargetIP,const int lTargetPort);
 		long sendMsg(const char* pMsg, size_t msgLenght);	
-		virtual long recvMsg(const char* pMsg,size_t& msgLength);
+		long recvMsg(const char* pMsg,size_t& msgLength);
+		long closeConnection();
 
 	};
 

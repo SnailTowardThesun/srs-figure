@@ -51,6 +51,13 @@ long tcp_socket::createSocket(const char* pTargetIP, const int sTargetPort)
 	return RESULT_OK;
 }
 
+long tcp_socket::closeConnection()
+{
+	if(mSocket == -1) return RESULT_OK;
+	close(mSocket);
+	return RESULT_OK;
+}
+
 long tcp_socket::sendMsg(const char* pMsg,size_t msgLength)
 {
 	if(mSocket == -1) return RESULT_ERROR;

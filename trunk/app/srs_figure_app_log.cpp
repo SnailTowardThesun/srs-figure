@@ -109,6 +109,7 @@ long srs_figure_log::log(const char* level_name, const char* tag ,const char *fm
 	if(flogFile > 0)
 	{
 		::write(flogFile,log_data,size);
+		::write(flogFile,"\n",1);
 	}
 	pthread_mutex_unlock(&mutex);
 	return RESULT_OK;

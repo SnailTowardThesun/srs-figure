@@ -9,3 +9,15 @@ SRSClient::~SRSClient()
 {
 
 }
+
+long SRSClient::beginToConnect()
+{
+	stream.CreateSRSConnection();
+	return RESULT_OK;
+}
+
+long SRSClient::closeConnection()
+{
+	stream.CloseSRSConnection();
+	return RESULT_OK;
+}

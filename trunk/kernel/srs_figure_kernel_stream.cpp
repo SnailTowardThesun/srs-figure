@@ -12,7 +12,6 @@ srs_stream::~srs_stream()
 {
 	if(mpTRecvThread != 0)
 		CloseSRSConnection();
-
 }
 
 // for rtmp handshake
@@ -26,18 +25,21 @@ long srs_stream::CreateSRSConnection()
 		return RESULT_ERROR;
 	}
 	// send c0
+	cout<<"begin to send c0"<<endl;
 	c0s0 c0;
 	mSocket.sendMsg((const char*)&c0.msg,1);
 
 	// recv s0
 	const char* s0 = nullptr;
 	size_t length = 0;
+	cout<<"ready to recv s0"<<endl;
 	mSocket.recvMsg(s0,length);
 	if(length != 0 &&s0[0] != 3) return RESULT_ERROR;
 	
 	// recv s1
 	const char* s1 = nullptr;
 	length = 0;
+	cout<<"ready to recv s1"<<endl;
 	mSocket.recvMsg(s1,length);
 	if(length == 0 || s1 == nullptr) return RESULT_ERROR;
 	
@@ -72,11 +74,13 @@ long srs_stream::CreateSRSConnection()
 
 long srs_stream::CloseSRSConnection()
 {
+	// close socket
+	mSocket.closeConnection();
 	if(mpTRecvThread == 0) return RESULT_OK;
 	// send signal to stop the receive thread
 	mIsExited = true;
 	void* state = nullptr;
-	pthread_join(&mpTRecvThread,&state);
+	pthread_join(mpTRecvThread,&state);
 	mpTRecvThread = 0;
 	return RESULT_OK;
 }
@@ -100,4 +104,5 @@ void* srs_stream::RecvThread()
 void srs_stream::DecodeOneChunk(const char* pMsg,const int lMsgLength)
 {
 	if(lMsgLength < 0) return;
+	cout<<pMsg<<endl;
 }

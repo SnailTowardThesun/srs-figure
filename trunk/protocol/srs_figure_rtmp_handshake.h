@@ -11,7 +11,7 @@ namespace srs_figure_handshake
 	public:
 		unsigned char msg;
 	public:
-		c0s0(){ msg = 3; }// the number is from the RTMP standard document
+		c0s0(){ msg = 0x03; }// the number is from the RTMP standard document
 		virtual ~c0s0(){ };
 	};
 
