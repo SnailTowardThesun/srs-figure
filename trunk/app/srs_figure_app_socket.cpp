@@ -3,9 +3,11 @@
 using namespace srs_figure_socket;
 
 #define MESSAGE_MAX_LENGTH 60*1024
+#define SOCKET_TIME_OUT 1000
 
 // base part 
 base_socket::base_socket():mSocket(-1),
+		mSockTimeOut(SOCKET_TIME_OUT),
 		mpMsg(nullptr)
 {
 	memset(&mSocketAddr,0,sizeof(mSocketAddr));
@@ -40,6 +42,8 @@ long tcp_socket::createSocket(const char* pTargetIP, const int sTargetPort)
 	mSocketAddr.sin_family = AF_INET;
 	mSocketAddr.sin_port = htons(sTargetPort);
 	mSocketAddr.sin_addr.s_addr = inet_addr(pTargetIP);
+
+	setsockopt(mSocket,SOL_SOCKET,SO_RCVTIMEO,(char*)&mSockTimeOut,sizeof(long));
 
 	// connect to server
 	if(connect(mSocket,(const sockaddr*)&mSocketAddr,sizeof(mSocketAddr)) != 0)

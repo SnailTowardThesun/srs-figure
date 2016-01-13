@@ -24,6 +24,7 @@ namespace srs_figure_socket
 		virtual long closeConnection() = 0;
 	public:
 		int mSocket;
+		long mSockTimeOut;
 		struct sockaddr_in mSocketAddr;
 		char* mpMsg;
 	};
