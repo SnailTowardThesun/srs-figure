@@ -9,8 +9,8 @@ else( CMAKE_BUILD_TYPE STREQUAL "Debug" )
 endif( CMAKE_BUILD_TYPE STREQUAL "Debug" )
 
 SET(PROTOCOL_RTMP_HANDSHAKE ./protocol/srs_figure_rtmp_handshake.cpp)
-SET(PROTOCOL_RTMP_AMF ./protocol/srs_figure_rtmp_amf.cpp)
-SET(PROTOCOL_FUNCTION ${PROTOCOL_RTMP_HANDSHAKE} ${PROTOCOL_RTMP_AMF})
+SET(PROTOCOL_RTMP_CHUNK ./protocol/srs_figure_rtmp_chunk.cpp)
+SET(PROTOCOL_FUNCTION ${PROTOCOL_RTMP_HANDSHAKE} ${PROTOCOL_RTMP_CHUNK})
 
 
 SET(APP_SOCKET ./app/srs_figure_app_socket.cpp)
