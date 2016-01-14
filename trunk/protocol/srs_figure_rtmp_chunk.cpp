@@ -3,13 +3,13 @@
 
 using namespace srs_rtmp_chunk;
 rtmp_chunk::rtmp_chunk(unsigned long lChunkStreamID,unsigned char cMessageType,long lTimeStamp):
+		mChunkBasicHeader(basic_header_error),
+		mpBasicHeader(nullptr),
+		mTimeStamp(lTimeStamp),
 		mMessageStreamID(0),
 		mMessageStreamType(cMessageType),
 		mChunkStreamID(lChunkStreamID),
-		mTimeStamp(lTimeStamp),
-		max_chunk_data_size(128),
-		mpBasicHeader(nullptr),
-		mChunkBasicHeader(basic_header_error)
+		max_chunk_data_size(128)
 {
 	// format mpBasicHeader
 	if(mChunkStreamID < 64)
@@ -62,15 +62,52 @@ std::vector<std::string> rtmp_chunk::AssembleOneControlChunk(std::string pMsg)
 	return mControlChunkList;
 }
 
-std::vector<std::string> rtmp_chunk::AssembleOneDataChunk(std::string pMsg)
+std::vector<std::string> rtmp_chunk::AssembleOneDataChunk(std::string pMsg, enChunkDataType chunkType,long timeStamp)
 {
 	mChunkList.clear();
 	if(mChunkBasicHeader ==basic_header_error) return mChunkList;
+	
+	if(pMsg.size() > max_chunk_data_size)
+	{
+		int loopTimes = pMsg.size() / max_chunk_data_size;
+		int i = 0;
+		for(i = 0; i < loopTimes; i++)// const size aka max_chunk_data_size
+		{
+			std::string chunkPackage,chunkHeader;
+			AssembleHeader(chunkHeader,chunkType,timeStamp);
+			if(chunkHeader.size() > 0)
+			{
+				chunkPackage += chunkHeader;
+				chunkPackage += pMsg.substr(i * max_chunk_data_size,(i+1) * max_chunk_data_size);
+				mChunkList.push_back(chunkPackage);
+			}
+		}
+		// the last size of data
+		std::string chunkPackage,chunkHeader;
+		AssembleHeader(chunkHeader,chunkType,timeStamp);
+		if(chunkHeader.size() > 0)
+		{
+			chunkPackage += chunkHeader;
+			chunkPackage += pMsg.substr(i * max_chunk_data_size,pMsg.size());
+			mChunkList.push_back(chunkPackage);
+		}
+	}
+	else
+	{
+		std::string chunkPackage,chunkHeader;
+		AssembleHeader(chunkHeader,chunkType,timeStamp);
+		if(chunkHeader.size() > 0)
+		{
+			chunkPackage += chunkHeader;
+			chunkPackage += pMsg;
+			mChunkList.push_back(chunkPackage);
+		}
+	}
 
 	return mChunkList;
 }
 
-long rtmp_chunk::AssembleHeader(std::string& msg)
+long rtmp_chunk::AssembleHeader(std::string& msg ,enChunkDataType ChunkType,long timeStamp)
 {
 	char* pMessageHeader = nullptr;
 	switch(mChunkState)

@@ -8,22 +8,27 @@ using namespace std;
 
 namespace srs_rtmp_chunk
 {
-	enum chunk_state
+	enum enChunkDataType
 	{
-		UnInitialized = 0,
-		FirstChunk = 1,
-		SecondChunk=2,
-		OtherChunk=3
-	};
-	enum basic_header_type
-	{
-		basic_header_type0 = 0,//2-63
-		basic_header_type1,// 64-319
-		basic_header_type2,// 64-65599
-		basic_header_error,
+		AUDIO_DATA_CHUNK = 0,
+		VIDEO_DATA_CHUNK,
 	};
 	class rtmp_chunk
 	{
+		enum chunk_state
+		{
+			UnInitialized = 0,
+			FirstChunk = 1,
+			SecondChunk=2,
+			OtherChunk=3
+		};
+		enum basic_header_type
+		{
+			basic_header_type0 = 0,//2-63
+			basic_header_type1,// 64-319
+			basic_header_type2,// 64-65599
+			basic_header_error,
+		};
 	public:
 		rtmp_chunk(unsigned long lChunkStreamID,unsigned char cMessageType,long lTimeStamp);
 		virtual ~rtmp_chunk();
@@ -36,14 +41,14 @@ namespace srs_rtmp_chunk
 		unsigned long mMessageStreamID;
 		unsigned char mMessageStreamType;
 		unsigned long mChunkStreamID;
-		int max_chunk_data_size;
+		unsigned long max_chunk_data_size;
 		
 		std::vector<std::string> mChunkList;
 		std::vector<std::string> mControlChunkList;
-	protectd:
-		long AssembleHeader(std::string& msg);
+	protected:
+		long AssembleHeader(std::string& msg, enChunkDataType ChunkType,long timeStamp = 0);
 	public:
-		std::vector<std::string> AssembleOneDataChunk(std::string pMsg);
+		std::vector<std::string> AssembleOneDataChunk(std::string pMsg, enChunkDataType ChunkType,long timeStamp = 0);
 		std::vector<std::string> AssembleOneControlChunk(std::string pMsg);
 	};
 };
