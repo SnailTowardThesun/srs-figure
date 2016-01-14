@@ -6,3 +6,4 @@ thirdparty:<a href = "http://rapidjson.org">rapidjson</a>
 supported platform:
 	Ubuntu14.04 
 	OS X
+
