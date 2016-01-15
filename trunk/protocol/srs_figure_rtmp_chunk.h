@@ -5,7 +5,8 @@
 #include "../core/srs_figure_core.h"
 #include <vector>
 using namespace std;
-
+// we just send c0 and c3 which is following the SRS's rules
+// we need to decode c0 c1 c2 c3 chunk header and get the fect whether the server is SRS
 namespace srs_rtmp_chunk
 {
 	enum enChunkDataType
