@@ -18,10 +18,10 @@ namespace srs_rtmp_chunk
 	{
 		enum chunk_state
 		{
-			UnInitialized = 0,
-			FirstChunk = 1,
-			SecondChunk=2,
-			OtherChunk=3
+			ZEARO_CHUNK		= 0,
+			FIRST_CHUNK		= 1,
+			SECOND_CHUNK	= 2,
+			THIRD_CHUNK		= 3
 		};
 		enum basic_header_type
 		{
@@ -34,7 +34,6 @@ namespace srs_rtmp_chunk
 		rtmp_chunk(unsigned long lChunkStreamID,unsigned char cMessageType,long lTimeStamp);
 		virtual ~rtmp_chunk();
 	private:
-		chunk_state mChunkState;
 		basic_header_type mChunkBasicHeader;
 		char* mpBasicHeader;
 		unsigned long mTimeStamp;
@@ -47,9 +46,9 @@ namespace srs_rtmp_chunk
 		std::vector<std::string> mChunkList;
 		std::vector<std::string> mControlChunkList;
 	protected:
-		long AssembleHeader(std::string& msg, enChunkDataType ChunkType,long timeStamp = 0);
+		long AssembleHeader(std::string& msg,chunk_state state, enChunkDataType ChunkType,long MsgStreamID,long timeStamp = 0);
 	public:
-		std::vector<std::string> AssembleOneDataChunk(std::string pMsg, enChunkDataType ChunkType,long timeStamp = 0);
+		std::vector<std::string> AssembleOneDataChunk(std::string pMsg, enChunkDataType chunkType,long MsgStreamID,long timeStamp = 0);
 		std::vector<std::string> AssembleOneControlChunk(std::string pMsg);
 	};
 };

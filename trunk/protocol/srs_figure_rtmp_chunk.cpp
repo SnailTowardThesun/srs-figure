@@ -62,7 +62,7 @@ std::vector<std::string> rtmp_chunk::AssembleOneControlChunk(std::string pMsg)
 	return mControlChunkList;
 }
 
-std::vector<std::string> rtmp_chunk::AssembleOneDataChunk(std::string pMsg, enChunkDataType chunkType,long timeStamp)
+std::vector<std::string> rtmp_chunk::AssembleOneDataChunk(std::string pMsg,enChunkDataType chunkType, long MsgStreamID,long timeStamp)
 {
 	mChunkList.clear();
 	if(mChunkBasicHeader ==basic_header_error) return mChunkList;
@@ -70,32 +70,43 @@ std::vector<std::string> rtmp_chunk::AssembleOneDataChunk(std::string pMsg, enCh
 	if(pMsg.size() > max_chunk_data_size)
 	{
 		int loopTimes = pMsg.size() / max_chunk_data_size;
-		int i = 0;
-		for(i = 0; i < loopTimes; i++)// const size aka max_chunk_data_size
+		// the first package, we should set the message header as type 0
+		std::string chunkPackage_0,chunkHeader_0;
+		AssembleHeader(chunkHeader_0,THIRD_CHUNK,chunkType,MsgStreamID,timeStamp);
+		if(chunkHeader_0.size() > 0)
+		{
+			chunkPackage_0 += chunkHeader_0;
+			chunkPackage_0 += pMsg.substr(0,max_chunk_data_size-1);
+			mChunkList.push_back(chunkPackage_0);
+		}
+		// middle package the message header is type 3
+		int i = 1;
+		for(i = 1; i < loopTimes; i++)// const size aka max_chunk_data_size
 		{
 			std::string chunkPackage,chunkHeader;
-			AssembleHeader(chunkHeader,chunkType,timeStamp);
+			AssembleHeader(chunkHeader,THIRD_CHUNK,chunkType,MsgStreamID,timeStamp);
 			if(chunkHeader.size() > 0)
 			{
 				chunkPackage += chunkHeader;
-				chunkPackage += pMsg.substr(i * max_chunk_data_size,(i+1) * max_chunk_data_size);
+				chunkPackage += pMsg.substr(i * max_chunk_data_size,(i+1) * max_chunk_data_size-1);
 				mChunkList.push_back(chunkPackage);
 			}
 		}
-		// the last size of data
+		// the last package, the chunkdata size is not const and message header is type 3
 		std::string chunkPackage,chunkHeader;
-		AssembleHeader(chunkHeader,chunkType,timeStamp);
+		AssembleHeader(chunkHeader,THIRD_CHUNK,chunkType,MsgStreamID,timeStamp);
 		if(chunkHeader.size() > 0)
 		{
 			chunkPackage += chunkHeader;
-			chunkPackage += pMsg.substr(i * max_chunk_data_size,pMsg.size());
+			chunkPackage += pMsg.substr(i * max_chunk_data_size-1,pMsg.size());
 			mChunkList.push_back(chunkPackage);
 		}
 	}
 	else
 	{
+		// message header is type 0
 		std::string chunkPackage,chunkHeader;
-		AssembleHeader(chunkHeader,chunkType,timeStamp);
+		AssembleHeader(chunkHeader,ZEARO_CHUNK,chunkType,timeStamp);
 		if(chunkHeader.size() > 0)
 		{
 			chunkPackage += chunkHeader;
@@ -107,34 +118,64 @@ std::vector<std::string> rtmp_chunk::AssembleOneDataChunk(std::string pMsg, enCh
 	return mChunkList;
 }
 
-long rtmp_chunk::AssembleHeader(std::string& msg ,enChunkDataType ChunkType,long timeStamp)
+long rtmp_chunk::AssembleHeader(std::string& msg ,chunk_state chunkState,enChunkDataType ChunkType,long MsgStreamID,long timeStamp)
 {
 	char* pMessageHeader = nullptr;
-	switch(mChunkState)
+	int msgSize = 0,timeForWrite = 0;
+	char* p = nullptr;
+	switch(chunkState)
 	{
-	case UnInitialized:
-		mChunkState = FirstChunk;
+	case ZEARO_CHUNK:
 		// FMT is 0
 		mpBasicHeader[0] = mpBasicHeader[0] & 0x3F;
 		pMessageHeader = new char[11];
+		// write timestamp 3 bytes
+		timeForWrite = timeStamp < 0xFFFFFF ? timeStamp:0xFFFFFF;
+		p = (char*)&timeForWrite;
+		pMessageHeader[0] = p[0];
+		pMessageHeader[1] = p[1];
+		pMessageHeader[2] = p[2];
+		
+		// write message length 3 bytes
+		p = (char*)&msgSize;
+		pMessageHeader[3] = p[0];
+		pMessageHeader[4] = p[1];
+		pMessageHeader[5] = p[2];
+
+		//message type id, 1 bytes 
+		pMessageHeader[6] = ChunkType == VIDEO_DATA_CHUNK ? 9 :(ChunkType == AUDIO_DATA_CHUNK ? 8 : 10);
+
+		//message stream ID;
+		p = (char*)MsgStreamID;
+		pMessageHeader[7] = p[0];
+		pMessageHeader[8] = p[1];
+		pMessageHeader[9] = p[2];
+		pMessageHeader[10] = p[3];
 		break;
 
-	case FirstChunk:
-		mChunkState = SecondChunk;
-		// FMT is 2
+	case FIRST_CHUNK:
+		// FMT is 1
 		mpBasicHeader[0] = (mpBasicHeader[0] & 0x3F) | 0x80;
 		pMessageHeader = new char[3];
 		break;
 
-	case SecondChunk:
-		mChunkState = OtherChunk;
-		// FMT is 3
+	case SECOND_CHUNK:
+		// FMT is 2
 		mpBasicHeader[0] = (mpBasicHeader[0] & 0x3F) | 0xC0;
 		break;
 
-	default:
+	case THIRD_CHUNK:
+		// FMT is 3
+		mpBasicHeader[0] = (mpBasicHeader[0] & 0x3F) | 0xF0;
 		break;
 	}
+	//make up the chunk header
+	msg += mpBasicHeader;
+	msg += pMessageHeader;
+	
+	// judge for extern timestamp
+	//
+	
 	if(pMessageHeader != nullptr) delete[] pMessageHeader;
 	return RESULT_OK;
 }
