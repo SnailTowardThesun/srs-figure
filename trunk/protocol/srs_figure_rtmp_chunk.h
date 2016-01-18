@@ -46,7 +46,8 @@ namespace srs_rtmp_chunk
 		std::vector<std::string> mChunkList;
 		std::vector<std::string> mControlChunkList;
 	protected:
-		long AssembleHeader(std::string& msg,chunk_state state, enChunkDataType ChunkType,long MsgStreamID,long timeStamp = 0);
+		long AssembleDataHeader(std::string& msg,chunk_state state, enChunkDataType ChunkType,long MsgStreamID,long timeStamp = 0);
+		long AssembleControlHeader(std::string& msg,long MsgStreamID);
 	public:
 		std::vector<std::string> AssembleOneDataChunk(std::string pMsg, enChunkDataType chunkType,long MsgStreamID,long timeStamp = 0);
 		std::vector<std::string> AssembleOneControlChunk(std::string pMsg);

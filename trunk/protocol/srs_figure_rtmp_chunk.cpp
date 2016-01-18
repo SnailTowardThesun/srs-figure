@@ -54,14 +54,6 @@ rtmp_chunk::~rtmp_chunk()
 	if(mpBasicHeader != nullptr) delete[] mpBasicHeader;
 }
 
-std::vector<std::string> rtmp_chunk::AssembleOneControlChunk(std::string pMsg)
-{
-	mControlChunkList.clear();
-	
-
-	return mControlChunkList;
-}
-
 std::vector<std::string> rtmp_chunk::AssembleOneDataChunk(std::string pMsg,enChunkDataType chunkType, long MsgStreamID,long timeStamp)
 {
 	mChunkList.clear();
@@ -72,7 +64,7 @@ std::vector<std::string> rtmp_chunk::AssembleOneDataChunk(std::string pMsg,enChu
 		int loopTimes = pMsg.size() / max_chunk_data_size;
 		// the first package, we should set the message header as type 0
 		std::string chunkPackage_0,chunkHeader_0;
-		AssembleHeader(chunkHeader_0,THIRD_CHUNK,chunkType,MsgStreamID,timeStamp);
+		AssembleDataHeader(chunkHeader_0,THIRD_CHUNK,chunkType,MsgStreamID,timeStamp);
 		if(chunkHeader_0.size() > 0)
 		{
 			chunkPackage_0 += chunkHeader_0;
@@ -84,7 +76,7 @@ std::vector<std::string> rtmp_chunk::AssembleOneDataChunk(std::string pMsg,enChu
 		for(i = 1; i < loopTimes; i++)// const size aka max_chunk_data_size
 		{
 			std::string chunkPackage,chunkHeader;
-			AssembleHeader(chunkHeader,THIRD_CHUNK,chunkType,MsgStreamID,timeStamp);
+			AssembleDataHeader(chunkHeader,THIRD_CHUNK,chunkType,MsgStreamID,timeStamp);
 			if(chunkHeader.size() > 0)
 			{
 				chunkPackage += chunkHeader;
@@ -94,7 +86,7 @@ std::vector<std::string> rtmp_chunk::AssembleOneDataChunk(std::string pMsg,enChu
 		}
 		// the last package, the chunkdata size is not const and message header is type 3
 		std::string chunkPackage,chunkHeader;
-		AssembleHeader(chunkHeader,THIRD_CHUNK,chunkType,MsgStreamID,timeStamp);
+		AssembleDataHeader(chunkHeader,THIRD_CHUNK,chunkType,MsgStreamID,timeStamp);
 		if(chunkHeader.size() > 0)
 		{
 			chunkPackage += chunkHeader;
@@ -106,7 +98,7 @@ std::vector<std::string> rtmp_chunk::AssembleOneDataChunk(std::string pMsg,enChu
 	{
 		// message header is type 0
 		std::string chunkPackage,chunkHeader;
-		AssembleHeader(chunkHeader,ZEARO_CHUNK,chunkType,timeStamp);
+		AssembleDataHeader(chunkHeader,ZEARO_CHUNK,chunkType,timeStamp);
 		if(chunkHeader.size() > 0)
 		{
 			chunkPackage += chunkHeader;
@@ -118,7 +110,7 @@ std::vector<std::string> rtmp_chunk::AssembleOneDataChunk(std::string pMsg,enChu
 	return mChunkList;
 }
 
-long rtmp_chunk::AssembleHeader(std::string& msg ,chunk_state chunkState,enChunkDataType ChunkType,long MsgStreamID,long timeStamp)
+long rtmp_chunk::AssembleDataHeader(std::string& msg ,chunk_state chunkState,enChunkDataType ChunkType,long MsgStreamID,long timeStamp)
 {
 	char* pMessageHeader = nullptr;
 	int msgSize = 0,timeForWrite = 0;
@@ -143,7 +135,7 @@ long rtmp_chunk::AssembleHeader(std::string& msg ,chunk_state chunkState,enChunk
 		pMessageHeader[5] = p[2];
 
 		//message type id, 1 bytes 
-		pMessageHeader[6] = ChunkType == VIDEO_DATA_CHUNK ? 9 :(ChunkType == AUDIO_DATA_CHUNK ? 8 : 10);
+		pMessageHeader[6] = ChunkType == VIDEO_DATA_CHUNK ? 9 :(ChunkType == AUDIO_DATA_CHUNK ? 8 : 0);
 
 		//message stream ID;
 		p = (char*)MsgStreamID;
@@ -178,4 +170,18 @@ long rtmp_chunk::AssembleHeader(std::string& msg ,chunk_state chunkState,enChunk
 	
 	if(pMessageHeader != nullptr) delete[] pMessageHeader;
 	return RESULT_OK;
+}
+
+long rtmp_chunk::AssembleControlHeader(std::string& msg, long MsgStreamID)
+{
+	return RESULT_OK;
+}
+
+std::vector<std::string> rtmp_chunk::AssembleOneControlChunk(std::string pMsg)
+{
+	mControlChunkList.clear();
+	// In this situation we send only on chunk package 
+	
+	mControlChunkList.push_back(pMsg);
+	return mControlChunkList;
 }
