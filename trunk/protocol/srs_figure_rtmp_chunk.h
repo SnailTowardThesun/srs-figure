@@ -13,6 +13,15 @@ namespace srs_rtmp_chunk
 	{
 		AUDIO_DATA_CHUNK = 0,
 		VIDEO_DATA_CHUNK,
+		MESSAGE_CONTROL_CHUNK,
+	};
+	enum enMessageCtrlTypeID
+	{
+		MESSAGE_CONTROL_TYPE_1 = 1,// set chunk size
+		MESSAGE_CONTROL_TYPE_2 = 2,// abort message
+		MESSAGE_CONTROL_TYPE_3 = 3,// acknowledgement
+		MESSAGE_CONTROL_TYPE_5 = 5,// window acknowledgement size
+		MESSAGE_CONTROL_TYPE_6 = 6,// set peer bandwith
 	};
 	class rtmp_chunk
 	{
@@ -46,11 +55,10 @@ namespace srs_rtmp_chunk
 		std::vector<std::string> mChunkList;
 		std::vector<std::string> mControlChunkList;
 	protected:
-		long AssembleDataHeader(std::string& msg,chunk_state state, enChunkDataType ChunkType,long MsgStreamID,long timeStamp = 0);
-		long AssembleControlHeader(std::string& msg,long MsgStreamID);
+		long AssembleDataHeader(std::string& msg,chunk_state state, enChunkDataType ChunkType,enMessageCtrlTypeID msgCtrlTypeID,long MsgStreamID,long timeStamp = 0);
 	public:
-		std::vector<std::string> AssembleOneDataChunk(std::string pMsg, enChunkDataType chunkType,long MsgStreamID,long timeStamp = 0);
-		std::vector<std::string> AssembleOneControlChunk(std::string pMsg);
+		std::vector<std::string> AssembleOneDataChunk(std::string pMsg, enChunkDataType chunkType,enMessageCtrlTypeID msgCtrlTypeID,long MsgStreamID,long timeStamp = 0);
+		std::vector<std::string> AssembleOneControlChunk(std::string pMsg, enMessageCtrlTypeID msgCtrlTypeID,long MsgStreamID);
 	};
 };
 

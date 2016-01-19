@@ -54,7 +54,7 @@ rtmp_chunk::~rtmp_chunk()
 	if(mpBasicHeader != nullptr) delete[] mpBasicHeader;
 }
 
-std::vector<std::string> rtmp_chunk::AssembleOneDataChunk(std::string pMsg,enChunkDataType chunkType, long MsgStreamID,long timeStamp)
+std::vector<std::string> rtmp_chunk::AssembleOneDataChunk(std::string pMsg,enChunkDataType chunkType,enMessageCtrlTypeID msgCtrlTypeID, long MsgStreamID,long timeStamp)
 {
 	mChunkList.clear();
 	if(mChunkBasicHeader ==basic_header_error) return mChunkList;
@@ -64,7 +64,7 @@ std::vector<std::string> rtmp_chunk::AssembleOneDataChunk(std::string pMsg,enChu
 		int loopTimes = pMsg.size() / max_chunk_data_size;
 		// the first package, we should set the message header as type 0
 		std::string chunkPackage_0,chunkHeader_0;
-		AssembleDataHeader(chunkHeader_0,THIRD_CHUNK,chunkType,MsgStreamID,timeStamp);
+		AssembleDataHeader(chunkHeader_0,THIRD_CHUNK,chunkType,msgCtrlTypeID,MsgStreamID,timeStamp);
 		if(chunkHeader_0.size() > 0)
 		{
 			chunkPackage_0 += chunkHeader_0;
@@ -76,7 +76,7 @@ std::vector<std::string> rtmp_chunk::AssembleOneDataChunk(std::string pMsg,enChu
 		for(i = 1; i < loopTimes; i++)// const size aka max_chunk_data_size
 		{
 			std::string chunkPackage,chunkHeader;
-			AssembleDataHeader(chunkHeader,THIRD_CHUNK,chunkType,MsgStreamID,timeStamp);
+			AssembleDataHeader(chunkHeader,THIRD_CHUNK,chunkType,msgCtrlTypeID,MsgStreamID,timeStamp);
 			if(chunkHeader.size() > 0)
 			{
 				chunkPackage += chunkHeader;
@@ -86,7 +86,7 @@ std::vector<std::string> rtmp_chunk::AssembleOneDataChunk(std::string pMsg,enChu
 		}
 		// the last package, the chunkdata size is not const and message header is type 3
 		std::string chunkPackage,chunkHeader;
-		AssembleDataHeader(chunkHeader,THIRD_CHUNK,chunkType,MsgStreamID,timeStamp);
+		AssembleDataHeader(chunkHeader,THIRD_CHUNK,chunkType,msgCtrlTypeID,MsgStreamID,timeStamp);
 		if(chunkHeader.size() > 0)
 		{
 			chunkPackage += chunkHeader;
@@ -98,7 +98,7 @@ std::vector<std::string> rtmp_chunk::AssembleOneDataChunk(std::string pMsg,enChu
 	{
 		// message header is type 0
 		std::string chunkPackage,chunkHeader;
-		AssembleDataHeader(chunkHeader,ZEARO_CHUNK,chunkType,timeStamp);
+		AssembleDataHeader(chunkHeader,ZEARO_CHUNK,chunkType,msgCtrlTypeID,MsgStreamID,timeStamp);
 		if(chunkHeader.size() > 0)
 		{
 			chunkPackage += chunkHeader;
@@ -110,7 +110,7 @@ std::vector<std::string> rtmp_chunk::AssembleOneDataChunk(std::string pMsg,enChu
 	return mChunkList;
 }
 
-long rtmp_chunk::AssembleDataHeader(std::string& msg ,chunk_state chunkState,enChunkDataType ChunkType,long MsgStreamID,long timeStamp)
+long rtmp_chunk::AssembleDataHeader(std::string& msg ,chunk_state chunkState,enChunkDataType ChunkType,enMessageCtrlTypeID msgCtrlTypeID, long MsgStreamID,long timeStamp)
 {
 	char* pMessageHeader = nullptr;
 	int msgSize = 0,timeForWrite = 0;
@@ -135,7 +135,7 @@ long rtmp_chunk::AssembleDataHeader(std::string& msg ,chunk_state chunkState,enC
 		pMessageHeader[5] = p[2];
 
 		//message type id, 1 bytes 
-		pMessageHeader[6] = ChunkType == VIDEO_DATA_CHUNK ? 9 :(ChunkType == AUDIO_DATA_CHUNK ? 8 : 0);
+		pMessageHeader[6] = ChunkType == VIDEO_DATA_CHUNK ? 9 :(ChunkType == AUDIO_DATA_CHUNK ? 8 : msgCtrlTypeID);
 
 		//message stream ID;
 		p = (char*)MsgStreamID;
@@ -172,16 +172,25 @@ long rtmp_chunk::AssembleDataHeader(std::string& msg ,chunk_state chunkState,enC
 	return RESULT_OK;
 }
 
-long rtmp_chunk::AssembleControlHeader(std::string& msg, long MsgStreamID)
+std::vector<std::string> rtmp_chunk::AssembleOneControlChunk(std::string pMsg,enMessageCtrlTypeID msgCtrlTypeID, long MsgStreamID)
 {
-	return RESULT_OK;
-}
-
-std::vector<std::string> rtmp_chunk::AssembleOneControlChunk(std::string pMsg)
-{
-	mControlChunkList.clear();
+	mChunkList.clear();
 	// In this situation we send only on chunk package 
-	
-	mControlChunkList.push_back(pMsg);
-	return mControlChunkList;
+	std::string strPayload;
+	switch(msgCtrlTypeID)
+	{
+	case MESSAGE_CONTROL_TYPE_1:
+		break;
+	case MESSAGE_CONTROL_TYPE_2:
+		break;
+	case MESSAGE_CONTROL_TYPE_3:
+		break;
+	case MESSAGE_CONTROL_TYPE_5:
+		break;
+	case MESSAGE_CONTROL_TYPE_6:
+		break;
+	default:
+		return mChunkList;
+	}
+	return AssembleOneDataChunk(strPayload,MESSAGE_CONTROL_CHUNK,msgCtrlTypeID,MsgStreamID);
 }
