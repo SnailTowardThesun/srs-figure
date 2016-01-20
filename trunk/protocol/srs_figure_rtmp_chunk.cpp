@@ -172,25 +172,76 @@ long rtmp_chunk::AssembleDataHeader(std::string& msg ,chunk_state chunkState,enC
 	return RESULT_OK;
 }
 
-std::vector<std::string> rtmp_chunk::AssembleOneControlChunk(std::string pMsg,enMessageCtrlTypeID msgCtrlTypeID, long MsgStreamID)
+std::vector<std::string> rtmp_chunk::AssembleOneControlChunk(enMessageCtrlTypeID msgCtrlTypeID, long MsgStreamID,long acknowledgementSize ,char limitType)
 {
 	mChunkList.clear();
 	// In this situation we send only on chunk package 
 	std::string strPayload;
+	char* tmp = nullptr;
 	switch(msgCtrlTypeID)
 	{
 	case MESSAGE_CONTROL_TYPE_1:
+		// get chunk size 
+		tmp = (char*)&max_chunk_data_size;
+		tmp[0] &=0x7F;
+		strPayload = tmp;
 		break;
 	case MESSAGE_CONTROL_TYPE_2:
+		// abort message
+		tmp = (char*)&mChunkStreamID;
+		strPayload = tmp;
 		break;
 	case MESSAGE_CONTROL_TYPE_3:
-		break;
 	case MESSAGE_CONTROL_TYPE_5:
+		// acknowledgement
+		tmp = (char*)&acknowledgementSize;
+		strPayload = tmp;
 		break;
 	case MESSAGE_CONTROL_TYPE_6:
+		tmp = (char*)&acknowledgementSize;
+		strPayload = tmp;
+		strPayload += limitType;
 		break;
 	default:
 		return mChunkList;
 	}
 	return AssembleOneDataChunk(strPayload,MESSAGE_CONTROL_CHUNK,msgCtrlTypeID,MsgStreamID);
+}
+
+void rtmp_chunk::DecodeOndeDataChunk(std::string pMsg)
+{
+	int chunk_stream_id = 0;
+	const char* cpMsg = pMsg.c_str();
+	// decode basic header
+	int bhType = cpMsg[0] & 0x3F;// judge the basic header type
+	if(bhType == 0)// 2 bytes
+	{
+		chunk_stream_id = 256 * pMsg[2] + pMsg[1] + 64;
+	}
+	else if(bhType == 1)// 3 bytes
+	{
+		chunk_stream_id = pMsg[1] + 64;
+	}
+	else// 1 bytes
+	{
+		chunk_stream_id = pMsg[0] & 0x3F;
+	}
+	
+	switch(pMsg[0] & 0xC0)
+	{
+	case 0:
+		break;
+	case 1:
+		break;
+	case 2:
+		break;
+	case 3:
+		break;
+	default:
+		srs_figure_log::getInstance()->log("Error","decodeChunk","get error chunk package");
+		return;
+	}
+	
+	// decode chunk header
+	// get payload
 }

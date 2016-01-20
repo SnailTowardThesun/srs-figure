@@ -58,7 +58,8 @@ namespace srs_rtmp_chunk
 		long AssembleDataHeader(std::string& msg,chunk_state state, enChunkDataType ChunkType,enMessageCtrlTypeID msgCtrlTypeID,long MsgStreamID,long timeStamp = 0);
 	public:
 		std::vector<std::string> AssembleOneDataChunk(std::string pMsg, enChunkDataType chunkType,enMessageCtrlTypeID msgCtrlTypeID,long MsgStreamID,long timeStamp = 0);
-		std::vector<std::string> AssembleOneControlChunk(std::string pMsg, enMessageCtrlTypeID msgCtrlTypeID,long MsgStreamID);
+		std::vector<std::string> AssembleOneControlChunk(enMessageCtrlTypeID msgCtrlTypeID,long MsgStreamID,long acknowledgementSize = 0, char limitType = 0);
+		void DecodeOndeDataChunk(std::string pMsg);
 	};
 };
 
