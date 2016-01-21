@@ -33,7 +33,7 @@ long srs_stream::CreateSRSConnection()
 
 	std::string c0c1 = "";
 	c0c1 += (char*)&c0;
-	coc1 += (char*)&c1;
+	c0c1 += (char*)&c1;
 	mSocket.sendMsg(c0c1.c_str(),c0c1.size());
 	
 	// recv s0
