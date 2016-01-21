@@ -20,7 +20,7 @@ namespace srs_figure_socket
 	public:
 		virtual long createSocket(const char* pTargetIP,const int lTargetPort) = 0;
 		virtual long sendMsg(const char* pMsg,size_t msgLength) = 0;
-		virtual long recvMsg(const char* pMsg,size_t& msgLength) = 0;
+		virtual long recvMsg(std::string& pMsg,size_t& msgLength) = 0;
 		virtual long closeConnection() = 0;
 	public:
 		int mSocket;
@@ -36,7 +36,7 @@ namespace srs_figure_socket
 	public:
 		long createSocket(const char* pTargetIP,const int lTargetPort);
 		long sendMsg(const char* pMsg, size_t msgLenght);	
-		long recvMsg(const char* pMsg,size_t& msgLength);
+		long recvMsg(std::string& pMsg,size_t& msgLength);
 		long closeConnection();
 
 	};

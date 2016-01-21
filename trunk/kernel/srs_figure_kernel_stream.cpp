@@ -32,35 +32,28 @@ long srs_stream::CreateSRSConnection()
 	c1s1 c1;
 
 	std::string c0c1 = "";
-	c0c1 += (char*)&c0;
-	c0c1 += (char*)&c1;
+	c0c1 += (char*)&c0.msg;
+	c0c1 += c1.getMsg();
 	mSocket.sendMsg(c0c1.c_str(),c0c1.size());
 	
 	// recv s0
-	const char* s0 = nullptr;
+	std::string s0;
 	size_t length = 0;
 	cout<<"ready to recv s0"<<endl;
 	mSocket.recvMsg(s0,length);
-	if(length != 0 &&s0[0] != 3) return RESULT_ERROR;
+	if(length == 0 || s0[0] != 3) return RESULT_ERROR;
 	
-	/*
-	// recv s1
-	const char* s1 = nullptr;
-	length = 0;
-	cout<<"ready to recv s1"<<endl;
-	mSocket.recvMsg(s1,length);
-	if(length == 0 || s1 == nullptr) return RESULT_ERROR;
-	*/
-
 	// send c2
 	c2s2 c2;
-	mSocket.sendMsg((const char*)&c2,sizeof(c2s2));
+	std::string strC2;
+	strC2 += c2.getMsg(c0c1,s0);
+	mSocket.sendMsg(strC2.c_str(),strC2.size());
 	
 	// recv s2
-	const char* s2 = nullptr;
+	std::string s2;
 	length = 0;
 	mSocket.recvMsg(s2,length);
-	if(length == 0 || s2 == nullptr) return RESULT_ERROR;
+	if(length == 0 || s2.size() == 0) return RESULT_ERROR;
 	
 
 	// finish the handshake,then create the receive thread
@@ -93,14 +86,13 @@ long srs_stream::CloseSRSConnection()
 
 void* srs_stream::RecvThread()
 {
-	char pMsg[DEFAULT_CHUNK_SIZE];
+	std::string pMsg;
 	size_t receivedMsgLength = 0;
 	do
 	{
-		memset(pMsg,0,DEFAULT_CHUNK_SIZE);
 		if(mSocket.recvMsg(pMsg,receivedMsgLength))
 		{
-			DecodeOneChunk(static_cast<const char*>(pMsg),static_cast<const int>(receivedMsgLength));
+			DecodeOneChunk(static_cast<const char*>(pMsg.c_str()),static_cast<const int>(receivedMsgLength));
 		}
 	}while(!mIsExited);
 	pthread_exit(0);

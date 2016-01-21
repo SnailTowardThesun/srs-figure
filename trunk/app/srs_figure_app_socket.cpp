@@ -73,7 +73,7 @@ long tcp_socket::sendMsg(const char* pMsg,size_t msgLength)
 	return RESULT_ERROR;
 }
 
-long tcp_socket::recvMsg(const char* pMsg, size_t& msgLength)
+long tcp_socket::recvMsg(std::string& pMsg, size_t& msgLength)
 {
 	if(mSocket == -1) return RESULT_ERROR;
 	memset(mpMsg,0,MESSAGE_MAX_LENGTH);

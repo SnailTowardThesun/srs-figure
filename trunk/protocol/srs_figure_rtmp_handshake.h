@@ -17,35 +17,31 @@ namespace srs_figure_handshake
 
 	class c1s1
 	{
-	public:
+	private:
 		// 4 bytes
 		int32_t time;
 		// 4 bytes
 		int32_t zero;
 		// 1528 bytes
-		unsigned char random_data[1528];// 1528 is from the RTMP standerd document
+		unsigned char random_data[1527];// 1528 is from the RTMP standerd document
+		// msg
+		std::string mPpayload;
 	public:
 		c1s1();
 		virtual ~c1s1();
 	public:
-		const char* getMsg();
+		std::string getMsg();
 	};
 
 	class c2s2
 	{
-	public: 
-		// 4 bytes
-		int32_t time;
-		// 4 bytes
-		int32_t zero;
-		// 1528 bytes
-		unsigned char random_echo[1528];// 1528 is from the RTMP standerd document
+	private: 	
+		std::string mpPayload;
+	public:
+		c2s2();
+		virtual ~c2s2();
+		std::string getMsg(std::string c1,std::string s1);
 
-	public:
-		c2s2(){};
-		virtual ~c2s2(){};
-	public:
-		const char* getMsg();
 	};
 };
 
