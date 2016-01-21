@@ -27,11 +27,14 @@ long srs_stream::CreateSRSConnection()
 	// send c0
 	cout<<"begin to send c0"<<endl;
 	c0s0 c0;
-	mSocket.sendMsg((const char*)&c0.msg,1);
-	
+
 	// send c1
 	c1s1 c1;
-	mSocket.sendMsg((const char*)&c1,sizeof(c1s1));
+
+	std::string c0c1 = "";
+	c0c1 += (char*)&c0;
+	coc1 += (char*)&c1;
+	mSocket.sendMsg(c0c1.c_str(),c0c1.size());
 	
 	// recv s0
 	const char* s0 = nullptr;
@@ -40,13 +43,15 @@ long srs_stream::CreateSRSConnection()
 	mSocket.recvMsg(s0,length);
 	if(length != 0 &&s0[0] != 3) return RESULT_ERROR;
 	
+	/*
 	// recv s1
 	const char* s1 = nullptr;
 	length = 0;
 	cout<<"ready to recv s1"<<endl;
 	mSocket.recvMsg(s1,length);
 	if(length == 0 || s1 == nullptr) return RESULT_ERROR;
-	
+	*/
+
 	// send c2
 	c2s2 c2;
 	mSocket.sendMsg((const char*)&c2,sizeof(c2s2));
