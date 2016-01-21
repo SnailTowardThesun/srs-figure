@@ -210,30 +210,94 @@ std::vector<std::string> rtmp_chunk::AssembleOneControlChunk(enMessageCtrlTypeID
 
 void rtmp_chunk::DecodeOndeDataChunk(std::string pMsg)
 {
-	int chunk_stream_id = 0;
+	int chunk_stream_id = 0,offset = 0;
 	const char* cpMsg = pMsg.c_str();
+
+	// extra info 
+	int32_t timestamp = 0;
+	int32_t messageLength = 0;
+	char	messageTypeId = 0;
+	int32_t messageStreamID = 0;
+	int32_t messageHeaderType = 0;
+	std::string payload = "";
 	// decode basic header
 	int bhType = cpMsg[0] & 0x3F;// judge the basic header type
 	if(bhType == 0)// 2 bytes
 	{
 		chunk_stream_id = 256 * pMsg[2] + pMsg[1] + 64;
+		offset += 2;
 	}
 	else if(bhType == 1)// 3 bytes
 	{
 		chunk_stream_id = pMsg[1] + 64;
+		offset += 3;
 	}
 	else// 1 bytes
 	{
 		chunk_stream_id = pMsg[0] & 0x3F;
+		offset += 1;
 	}
 	
-	switch(pMsg[0] & 0xC0)
+	char* pMsgHeader = nullptr;
+	char* tmp = nullptr;
+	messageHeaderType = pMsg[0] & 0xC0;
+	switch(messageHeaderType)
 	{
 	case 0:
+		pMsgHeader = new char[11];
+		memcpy(pMsgHeader,cpMsg+offset,11);
+		// time stamp
+		tmp = (char*)&timestamp;
+		tmp[2] = pMsgHeader[0];
+		tmp[1] = pMsgHeader[1];
+		tmp[0] = pMsgHeader[2];
+
+		// message stream lenght
+		tmp = (char*)&messageLength;
+		tmp[2] = pMsgHeader[3];
+		tmp[1] = pMsgHeader[4];
+		tmp[0] = pMsgHeader[5];
+
+		// message type id
+		messageTypeId = pMsgHeader[6];
+
+		// message stream id
+		tmp = (char*)&messageStreamID;
+		tmp[3] = pMsgHeader[7];
+		tmp[2] = pMsgHeader[8];
+		tmp[1] = pMsgHeader[9];
+		tmp[0] = pMsgHeader[10];
+		
+		offset += 11;
 		break;
 	case 1:
+		pMsgHeader = new char[7];
+		memcpy(pMsgHeader,cpMsg+offset,7);
+		offset += 7;
+		// time stamp
+		tmp = (char*)&timestamp;
+		tmp[2] = pMsgHeader[0];
+		tmp[1] = pMsgHeader[1];
+		tmp[0] = pMsgHeader[2];
+
+		// message stream lenght
+		tmp = (char*)&messageLength;
+		tmp[2] = pMsgHeader[3];
+		tmp[1] = pMsgHeader[4];
+		tmp[0] = pMsgHeader[5];
+
+		// message type id
+		messageTypeId = pMsgHeader[6];	
 		break;
 	case 2:
+		pMsgHeader = new char[3];
+		memcpy(pMsgHeader,cpMsg+offset,3);
+		offset += 3;
+		// time stamp
+		tmp = (char*)&timestamp;
+		tmp[2] = pMsgHeader[0];
+		tmp[1] = pMsgHeader[1];
+		tmp[0] = pMsgHeader[2];
 		break;
 	case 3:
 		break;
@@ -241,7 +305,57 @@ void rtmp_chunk::DecodeOndeDataChunk(std::string pMsg)
 		srs_figure_log::getInstance()->log("Error","decodeChunk","get error chunk package");
 		return;
 	}
-	
-	// decode chunk header
+	payload += &pMsgHeader[offset];
+
+	if(chunk_stream_id == 2)
+	{
+		// control message
+		const char* pPayload = payload.c_str();
+		int32_t getChunkStreamID = 0;
+		int32_t getSequenceNum = 0;
+		int32_t getAcknowledgeSize = 0;
+		char getLimitType = 0;
+		switch (messageTypeId)
+		{
+		case 1:
+			tmp = (char*)&max_chunk_data_size;
+			tmp [3] = pPayload[0];
+			tmp [2] = pPayload[1];
+			tmp [1] = pPayload[2];
+			tmp [0] = pPayload[3];
+			break;
+		case 2:
+			tmp = (char*)&getChunkStreamID;
+			tmp [3] = pPayload[0];
+			tmp [2] = pPayload[1];
+			tmp [1] = pPayload[2];
+			tmp [0] = pPayload[3];
+			break;
+		case 3:
+			tmp = (char*)&getSequenceNum;
+			tmp [3] = pPayload[0];
+			tmp [2] = pPayload[1];
+			tmp [1] = pPayload[2];
+			tmp [0] = pPayload[3];
+			break;
+		case 5:
+			tmp = (char*)&getAcknowledgeSize;
+			tmp [3] = pPayload[0];
+			tmp [2] = pPayload[1];
+			tmp [1] = pPayload[2];
+			tmp [0] = pPayload[3];
+			break;
+		case 6:
+			tmp = (char*)&getAcknowledgeSize;
+			tmp [3] = pPayload[0];
+			tmp [2] = pPayload[1];
+			tmp [1] = pPayload[2];
+			tmp [0] = pPayload[3];
+
+			getLimitType = pPayload[4];
+			break;
+		}
+	}
 	// get payload
+	if(pMsgHeader != nullptr) delete[] pMsgHeader;
 }
