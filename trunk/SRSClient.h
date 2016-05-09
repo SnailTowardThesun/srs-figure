@@ -7,13 +7,13 @@
 class SRSClient
 {
 public:
-	SRSClient();
-	virtual ~SRSClient();
+    SRSClient();
+    virtual ~SRSClient();
 private:
-	srs_stream stream;
+    srs_stream stream;
 public:
-	long beginToConnect();
-	long closeConnection();
+    long beginToConnect();
+    long closeConnection();
 };
 
 #endif

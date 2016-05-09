@@ -12,19 +12,19 @@ using namespace srs_figure_handshake;
 class srs_stream
 {
 public:
-	srs_stream();
-	~srs_stream();
+    srs_stream();
+    ~srs_stream();
 private:
-	tcp_socket mSocket;
-	pthread_t mpTRecvThread;
-	bool mIsExited;
+    tcp_socket mSocket;
+    pthread_t mpTRecvThread;
+    bool mIsExited;
 protected:
-	static void* InitRecvThread(void* pParam){ return ((srs_stream*)pParam)->RecvThread(); }
-	void* RecvThread();
-	void DecodeOneChunk(const char* pMsg,const int lMsg);
+    static void* InitRecvThread(void* pParam){ return ((srs_stream*)pParam)->RecvThread(); }
+    void* RecvThread();
+    void DecodeOneChunk(const char* pMsg,const int lMsg);
 public:
-	long CreateSRSConnection();
-	long CloseSRSConnection();
+    long CreateSRSConnection();
+    long CloseSRSConnection();
 };
 
 #endif
